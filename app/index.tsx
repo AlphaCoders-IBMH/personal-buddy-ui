@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { Button, Text } from "react-native-paper";
+import App from "../App";
 
 export default function Index() {
   const router = useRouter();
@@ -22,7 +23,9 @@ export default function Index() {
       >
         Login
       </Button>
+      <App/>
     </View>
+    
   );
 }
 
