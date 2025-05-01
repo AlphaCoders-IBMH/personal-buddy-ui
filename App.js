@@ -3,11 +3,15 @@ import { Button, Text, View, FlatList } from "react-native";
 import * as Google from "expo-auth-session/providers/google";
 import { makeRedirectUri } from "expo-auth-session";
 import axios from "axios";
+import Email from "./Email";
+import { Card } from "react-native-paper";
+import { processEmailsWithGranite } from "./granite";
 // import * as AuthSession from "expo-auth-session";
 
 export default function App() {
-  const [subjects, setSubjects] = useState([]);
+  const [gmails, setGmails] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
+  const [summary, setSummary] = useState("");
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId:
@@ -56,12 +60,12 @@ export default function App() {
         }
       };
 
-      window.addEventListener("message", handleMessage);
+       window.addEventListener("message", handleMessage);
 
-      // Cleanup the event listener when component unmounts
-      return () => {
-        window.removeEventListener("message", handleMessage);
-      };
+      // // Cleanup the event listener when component unmounts
+       return () => {
+         window.removeEventListener("message", handleMessage);
+       };
     }
   }, []);
 
@@ -89,6 +93,7 @@ export default function App() {
 
   async function fetchGmailSubjects(accessToken) {
     try {
+      console.log("Access Token:", accessToken);
       const res = await axios.get(
         "https://gmail.googleapis.com/gmail/v1/users/me/messages",
         {
@@ -97,9 +102,11 @@ export default function App() {
         }
       );
 
+      console.log(res.data.messages + "res here");
+
       const messageIds = res.data.messages?.map((msg) => msg.id) || [];
 
-      const subjects = [];
+      const emails = [];
       for (const id of messageIds) {
         const mail = await axios.get(
           `https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}`,
@@ -112,10 +119,18 @@ export default function App() {
         const subject = headers.find(
           (header) => header.name === "Subject"
         )?.value;
-        if (subject) subjects.push(subject);
+        const from = headers.find((header) => header.name === "From")?.value;
+        const to = headers.find((header) => header.name === "To")?.value;
+        const body = mail.data.snippet; // Using snippet as email body
+        const priority = headers.find((header) => header.name === "X-Priority")?.value || "Normal";
+
+        if (subject) {
+          emails.push(new Email(subject, from, to, body, priority));
+        }
       }
-      console.log(subjects + " values here");
-      setSubjects(subjects);
+
+      console.log(emails + " email objects here");
+      setGmails(emails);
     } catch (err) {
       console.error(err);
     }
@@ -127,6 +142,37 @@ export default function App() {
       .catch((err) => console.error("Prompt error:", err));
   };
 
+  const handleSummarizeEmails = async () => {
+    try {
+      if (gmails.length === 0) {
+        console.warn("No emails available to summarize.");
+        return;
+      }
+
+      const customPrompt = "Summarize the following emails:"; // You can customize this prompt
+      console.log("Sending emails and prompt to Granite API...");
+
+      const result = await processEmailsWithGranite(gmails, customPrompt);
+
+      console.log("Summary received from Granite API:", result);
+      setSummary(result);
+    } catch (error) {
+      console.error("Error summarizing emails:", error);
+      alert("Failed to summarize emails. Please try again later.");
+    }
+  };
+
+  const renderGmailCard = ({ item }) => (
+    <Card style={{ margin: 10, padding: 10 }}>
+      <Card.Title title={item.subject} subtitle={`From: ${item.from}`} />
+      <Card.Content>
+        <Text>To: {item.to}</Text>
+        <Text>Body: {item.body}</Text>
+        <Text>Priority: {item.priority}</Text>
+      </Card.Content>
+    </Card>
+  );
+
   return (
     <View style={{ flex: 1, justifyContent: "center", padding: 20 }}>
       <Button
@@ -135,12 +181,26 @@ export default function App() {
         onPress={() => handleLogin()}
       />
 
-      {subjects.length > 0 && (
+      {gmails.length > 0 && (
         <FlatList
-          data={subjects}
+          data={gmails}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => <Text style={{ margin: 10 }}>{item}</Text>}
+          renderItem={renderGmailCard}
         />
+      )}
+
+      {gmails.length > 0 && (
+        <Button
+          title="Summarize Emails"
+          onPress={handleSummarizeEmails}
+        />
+      )}
+
+      {summary && (
+        <View style={{ marginTop: 20 }}>
+          <Text style={{ fontWeight: "bold" }}>Summary:</Text>
+          <Text>{summary}</Text>
+        </View>
       )}
     </View>
   );
