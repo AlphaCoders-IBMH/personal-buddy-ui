@@ -1,7 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
+import axios from "axios";
+import qs from "qs";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -20,7 +21,34 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 
 export {auth};
+
+
+
+
+
+const callProxyToIBM = async () => {
+  const IBM_API_KEY = "6Zdjf_EuSukdgjcinncuhe_coEAaJ5nL2z4pCHm6NuQ7";
+  const data = qs.stringify({
+          grant_type: "urn:ibm:params:oauth:grant-type:apikey",
+          apikey: IBM_API_KEY,
+        });
+      
+  try {
+    const response = await axios.post(
+      "https://us-central1-email-summary-69414.cloudfunctions.net/proxyToIBM",data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("Response from Firebase Function:", response.data);
+  } catch (error) {
+    console.error("Error calling Firebase Function:", error.message);
+  }
+};
+
+export default callProxyToIBM;
