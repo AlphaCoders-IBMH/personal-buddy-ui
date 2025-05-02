@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Appbar, Text } from 'react-native-paper';
-import { useRouter } from 'expo-router';
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { Appbar, Divider, List, Text } from "react-native-paper";
+import { useRouter } from "expo-router";
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -14,12 +14,17 @@ export default function SettingsScreen() {
       </Appbar.Header>
 
       <View style={styles.content}>
-        <Text>Settings page content</Text>
+        <List.Item
+          title={"Signout"}
+          onPress={() => router.push({ pathname: "/" })}
+          left={() => <List.Icon icon="logout" />}
+        />
       </View>
+      <Divider/>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  content: { flex: 1, backgroundColor: "#fff",padding:16 },
 });
