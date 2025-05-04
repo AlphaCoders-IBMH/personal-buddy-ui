@@ -8,13 +8,13 @@ export default function CreateReminderComponent({ release,handleClose }: any) {
   const [selectedRelease, setSelectedRelease] = useState(
     release?.version || "v1.3"
   );
-  const [notificationTime, setNotificationTime] = useState("1 hour before");
+  const [notificationTime, setNotificationTime] = useState("1 hour");
   const [reminderType, setReminderType] = useState("Push");
   const [notes, setNotes] = useState("");
   const router = useRouter();
 
   const scheduleNotification = async () => {
-    const triggerSeconds = notificationTime === "1 hour before" ? 3600 : 86400;
+    const triggerSeconds = notificationTime === "1 hour" ? 1 : 86400;
 
     if (Platform.OS === "web") {
       if (Notification.permission === "granted") {
@@ -43,7 +43,7 @@ export default function CreateReminderComponent({ release,handleClose }: any) {
             (notes ? `\nNotes: ${notes}` : ""),
         },
         trigger: {
-          type: "timeInterval",
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
           seconds: triggerSeconds,
           repeats: false,
         },

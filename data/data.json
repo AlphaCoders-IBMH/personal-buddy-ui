@@ -1,0 +1,11 @@
+{
+  "input": "Please summarize the following development tasks that need to be taken care today and also list in priority and send as json array of tasks:\n\n- Fix login page bug in mobile app\n- Update user profile UI in dashboard\n- Write integration tests for payment gateway\n- Research and present GraphQL pros and cons\n- Improve server response time under load\n\nThe summary should be in plain English, not code or pull request style.",
+  "parameters": {
+  "decoding_method": "greedy",
+  "max_new_tokens": 200,
+  "stop_sequences": [],
+  "repetition_penalty": 1.05
+  },
+  "model_id": "ibm/granite-13b-instruct-v2",
+  "project_id": "cf14ff7c-6d7d-4cdb-b009-670f8020f8f7"
+  }
