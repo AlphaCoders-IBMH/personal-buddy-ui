@@ -72,7 +72,7 @@ export default function HomeComponent({ navigation }: any) {
             <Text variant="headlineSmall" style={styles.title}>
               Good Morning <span style={{ fontWeight: "bold" }}>{user.name}</span> !
             </Text>
-            <Text variant="bodyLarge">Here's your Summary - </Text>
+            <Text variant="bodyLarge">Your focus tasks for the day - </Text>
 
             <Button
               mode="outlined"
